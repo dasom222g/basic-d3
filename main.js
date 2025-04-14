@@ -181,19 +181,32 @@ const responsiveBounding = () => {
   // 미션3
   // const svgResponsiveVerticalEl = d3.select("svg.responsive-vertical");
 
+  const boxGap = 30; // 박스의 양옆 간격
+  const barGap = 100; // 각 막대간 간격
+
   const yPercent = d3
     .scaleLinear() // 비율화 준비
     .domain([0, d3.max(datasetResponsive)]) // 데이터를 비율화
     .range([0, svgHeight - 40]); // 데이터가 출력될 프레임을 비율화
+
+  const barX = (i) => {
+    return (
+      (i * (svgWidth - boxGap * 2) + barGap) / datasetResponsive.length + boxGap
+    );
+  };
+
+  const barWidth = () => {
+    return (svgWidth - boxGap * 2) / datasetResponsive.length - barGap; // 양옆 간격 제외
+  };
 
   svgResponsiveVerticalEl
     .selectAll("rect")
     .data(datasetResponsive)
     .enter()
     .append("rect")
-    .attr("x", (_, i) => (i * svgWidth) / datasetResponsive.length + 10)
+    .attr("x", (_, i) => barX(i))
     .attr("y", (d, i) => svgHeight - yPercent(d))
-    .attr("width", (_, i) => svgWidth / datasetResponsive.length - 20)
+    .attr("width", (_, i) => barWidth())
     .attr("height", (d) => yPercent(d))
     .attr("fill", "aqua");
 
@@ -205,10 +218,7 @@ const responsiveBounding = () => {
     .text((d) => d)
     .attr(
       "x",
-      (d, i) =>
-        (i * svgWidth) / datasetResponsive.length +
-        10 +
-        ((svgWidth - 20) / datasetResponsive.length - 10) / 2 // text 정중앙 정렬
+      (d, i) => barX(i) + barWidth() / 2 // text 정중앙 정렬 (막대의 시작지점에서 너비의 절반만큼 더 이동)
     )
     .attr("y", (d, i) => svgHeight - yPercent(d) - 10)
     .attr("width", (d) => d)
