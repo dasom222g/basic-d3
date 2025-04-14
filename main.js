@@ -104,9 +104,11 @@ const svgResponsiveEl = d3.select("svg.responsive");
 const svgResponsiveRightEl = d3.select("svg.responsive-right");
 const svgResponsiveVerticalEl = d3.select("svg.responsive-vertical");
 
-const responsiveBounding = () => {
+const responsiveBounding = (
+  animationInterval = 200,
+  animationDuration = 1000
+) => {
   const svgWidth = frame.getClientRects()[0].width;
-  console.log("🚀 ~ responsiveBounding ~ svgWidth:", svgWidth);
 
   // ⭐️ 각 SVG 초기화
   svgResponsiveEl.selectAll("*").remove();
@@ -182,7 +184,7 @@ const responsiveBounding = () => {
   // const svgResponsiveVerticalEl = d3.select("svg.responsive-vertical");
 
   const boxGap = 30; // 박스의 양옆 간격
-  const barGap = 100; // 각 막대간 간격
+  const barGap = 20; // 각 막대간 간격
 
   const yPercent = d3
     .scaleLinear() // 비율화 준비
@@ -205,10 +207,14 @@ const responsiveBounding = () => {
     .enter()
     .append("rect")
     .attr("x", (_, i) => barX(i))
-    .attr("y", (d, i) => svgHeight - yPercent(d))
-    .attr("width", (_, i) => barWidth())
+    .attr("y", svgHeight) // 초기값: 애니메이션 전 맨 아래에서 시작
+    .attr("width", barWidth())
     .attr("height", (d) => yPercent(d))
-    .attr("fill", "aqua");
+    .attr("fill", "aqua")
+    .transition()
+    .delay((_, i) => i * animationInterval)
+    .duration(animationDuration)
+    .attr("y", (d, i) => svgHeight - yPercent(d)); // 최종값
 
   svgResponsiveVerticalEl
     .selectAll("text")
@@ -224,13 +230,20 @@ const responsiveBounding = () => {
     .attr("width", (d) => d)
     .attr("height", 25)
     .attr("font-size", "20px")
-    .attr("fill", "black")
+    .attr("fill", "transparent") // 애니메이션 전 초기값
+    .transition()
+    .delay((_, i) => i * animationInterval + animationDuration)
+    .duration(animationDuration)
+    .attr("fill", "black") // 애니메이션 후 최종값
     .attr("text-anchor", "middle"); // text 정중앙 정렬
 };
 
+const animationInterval = 500;
+const animationDuration = 1000;
+
 window.onload = () => {
   //실행될 코드
-  responsiveBounding();
+  responsiveBounding(animationInterval, animationDuration);
 };
 
-window.addEventListener("resize", responsiveBounding);
+window.addEventListener("resize", () => responsiveBounding(0, 0));
